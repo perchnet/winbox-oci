@@ -30,6 +30,6 @@ jobs:
 
       - name: Run build
         if: ${{ steps.pr.outputs.pull-request-number != '' }}
-        run: gh workflow run build.yml
+        run: gh workflow run build.yml -f version=${{ steps.version.outputs.version }}
         env:
           GH_TOKEN: ${{ github.token }}
