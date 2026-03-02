@@ -1,0 +1,25 @@
+name: Update WinBox version
+on:
+  push:
+  schedule:
+    - cron: "0 7 * * *" # daily at 07:00 UTC
+  workflow_dispatch:
+jobs:
+  update-winbox-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Update WinBox version
+        id: version
+        run: echo "version=$(curl -fSsL https://upgrade.mikrotik.com/routeros/winbox/LATEST.4 | tee -a "build_files/winbox.version")" | tee -a $GITHUB_OUTPUT
+      - name: Open PR if changed
+        id: pr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: 'chore: Update WinBox to version ${{ steps.version.outputs.version }}'
+          title: 'Update WinBox to version ${{ steps.version.outputs.version }}'
+          body: 'This updates the WinBox version to the latest version from Mikrotik.'
+      - name: Merge PR
+        if: steps.pr.outputs.pull_request_number != ''
+        run: gh pr merge --merge --auto "${{ steps.pr.outputs.pull_request_number }}"
