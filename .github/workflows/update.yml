@@ -21,5 +21,5 @@ jobs:
           title: 'Update WinBox to version ${{ steps.version.outputs.version }}'
           body: 'This updates the WinBox version to the latest version from Mikrotik.'
       - name: Merge PR
-        if: steps.pr.outputs.pull_request_number != ''
+        if: ${{ steps.pr.outputs.pull-request-number != '' }}
         run: gh pr merge --merge --auto "${{ steps.pr.outputs.pull-request-number }}"
