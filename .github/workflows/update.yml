@@ -12,7 +12,9 @@ jobs:
         uses: actions/checkout@v6
       - name: Update WinBox version
         id: version
-        run: echo "version=$(curl -fSsL https://upgrade.mikrotik.com/routeros/winbox/LATEST.4 | tee -a "build_files/winbox.version")" | tee -a $GITHUB_OUTPUT
+        run: |
+          curl -fSsLo build_files/winbox.version https://upgrade.mikrotik.com/routeros/winbox/LATEST.4
+          echo "version=$(<build_files/winbox.version)" | tee -a $GITHUB_OUTPUT
       - name: Open PR if changed
         id: pr
         uses: peter-evans/create-pull-request@v8
