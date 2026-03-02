@@ -10,16 +10,10 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  LATEST_VERSION: 44
 
 concurrency: ${{ github.repository }}_${{ github.ref_name }}
 jobs:
   build-and-push-image:
-    strategy:
-      matrix:
-        base-version:
-          - 43
-          - 44
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -28,6 +22,10 @@ jobs:
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v6
+      
+      - name: Get version
+        run: |
+          echo "version=$(<"/ctx/build/winbox.version")" | tee -a $GITHUB_OUTPUT
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -46,28 +44,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ matrix.base-version }}
-            ${{ matrix.base-version == env.LATEST_VERSION && format('ghcr.io/{0}:{1}', github.repository, 'latest') || '' }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/buildcache:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/buildcache:buildcache,mode=max
-          build-args: |
-            BASE_VERSION=${{ matrix.base-version }}
-          #platforms: linux/amd64,linux/arm64
-#           outputs: type=local,dest=./out
-#       - name: tar the release
-#         id: tar
-#         run: |
-#           TAR="$(basename "${{ github.repository }}")-${{ github.ref_name }}".tgz
-#           tar -zcvf "${TAR}" ./out
-#           echo tarball="${TAR}" | tee "${GITHUB_OUTPUT}"
-#         if: github.ref_type == 'tag'
-#       #- name: Setup upterm session
-#       #  uses: owenthereal/action-upterm@v1
-#       #  with:
-#       #    limit-access-to-users: 'b-' # Specific authorized users only
-#       - name: Release
-#         if: github.ref_type == 'tag'
-#         uses: softprops/action-gh-release@v2
-#         with:
-#           files: "${{ steps.tar.outputs.tarball }}"
-# 
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/buildcache:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/buildcache:buildcache,mode=max

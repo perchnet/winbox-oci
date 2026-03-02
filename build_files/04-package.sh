@@ -1,7 +1,15 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 set -euxo pipefail
 
 ## Package up your built binaries in this script...
 
-#cp -R /build/aseprite/build/bin/* /out/usr/lib/aseprite
-#ln -s ../../bin/aseprite /out/usr/bin/aseprite
+srcdir="/src"
+
+package() {
+  install -D -m0755 "${srcdir}/WinBox" "${pkgdir}/usr/bin/WinBox"
+  install -D -m0644 "${srcdir}/assets/img/winbox.png" "${pkgdir}/usr/share/pixmaps/winbox.png"
+  install -D -m0644 "${srcdir}/winbox.desktop" "${pkgdir}/usr/share/applications/winbox.desktop"
+}
+
+pkgdir="/out"
+package
