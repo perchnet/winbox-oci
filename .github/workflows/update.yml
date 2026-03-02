@@ -6,6 +6,7 @@ on:
     paths-ignore: # don't run when:
       - "**.md" # docs changed
       - ".github/workflows/update.yml" # update workflow changed (it will call this one)
+      - "renovate.json" # renovate changed
   schedule:
     - cron: "0 7 * * *" # daily at 07:00 UTC
   workflow_dispatch:
