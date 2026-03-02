@@ -1,16 +1,25 @@
-name: Build and Push Image to GHCR
+name: Build and Push Image
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      version:
+        description: "WinBox version"
+        required: false
+
+run-name: Build WinBox ${{ inputs.version }}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
-concurrency: ${{ github.repository }}_${{ github.ref_name }}
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
