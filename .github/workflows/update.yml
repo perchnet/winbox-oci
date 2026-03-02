@@ -23,3 +23,5 @@ jobs:
       - name: Merge PR
         if: ${{ steps.pr.outputs.pull-request-number != '' }}
         run: gh pr merge --merge --auto "${{ steps.pr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
