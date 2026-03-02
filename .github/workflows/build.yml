@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths-ignore: # don't run when:
+      - "**.md" # docs changed
+      - ".github/workflows/update.yml" # update workflow changed (it will call this one)
   workflow_dispatch:
     inputs:
       version:
