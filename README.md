@@ -1,19 +1,44 @@
-# bri's basic fedora builder container
+# WinBox OCI image
 
-i use this template (and the image it produces) to build "distroless" OCI images that i can then `COPY` into another container. you can use it too!
+This repo produces a container image that contains the WinBox GUI for Mikrotik RouterOS.
 
-basically you just use the template to make a new repo, and add the steps into the scripts to install dependencies, download source code, build some shit, and copy the shit somewhere to be pulled into a new ("distroless") container image that we then push.
+It is intended to be `COPY`ed into a derived bootc container image, like so:
 
-most of the steps in the Containerfile are commented out, because i use the base template itself as a base `FROM` image for repos that i use this template for. 
+```dockerfile
+FROM ghcr.io/perchnet/winbox-oci:latest AS winbox
+FROM ghcr.io/zirconium-dev/zirconium:latest
 
-## examples
+COPY --from=winbox / /
+```
 
-right now the only repos i'm using this template as-is for are private, but a public example will come soon. if you use it, file an issue and i'll put your project here!
+Or you can use bluebuild:
 
-## prior art
+```yaml
+name: image
+base-image: ghcr.io/zirconium-dev/zirconium
+image-version: latest
+modules:
+  - type: copy
+    from: ghcr.io/perchnet/winbox-oci:latest
+    src: /
+    dest: /
+```
 
-i did something similar but less thought-out [here](perchnet/interception-vimproved) to build a key remapping tool as an OCI image for my bootc image
+But if you wanna be silly you probably can just run it with podman: (no idea if you need these args or even if it works lol it's from [here](https://discussion.fedoraproject.org/t/how-can-i-use-podman-to-run-a-wayland-app/1672/2))
 
-much of the layout of this repo has been inspired and loosely ripped from the [zirconium](zirconium-dev/zirconium) repo. 
-
-—bri✨
+```bash
+args=(
+    # Disable SELinux label to enable mounting runtime socket
+    --security-opt label=disable
+    # Enable legacy X11
+    -v /tmp/.X11-unix/:/tmp/.X11-unix/
+    -e DISPLAY=:0
+    # Enable xdg runtime for wayland and pulseaudio socket  
+    -v /run/user/1000/:/run/user/1000/
+    -e XDG_RUNTIME_DIR=/run/user/1000
+    -e PULSE_SERVER=/run/user/1000/pulse/native
+    # fix XError bad access
+    --ipc host
+)
+podman run ${args[@]} ghcr.io/perchnet/winbox-oci:latest
+```

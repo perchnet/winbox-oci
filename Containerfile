@@ -50,3 +50,5 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 
 FROM scratch
 COPY --from=builder /out/ /
+
+ENTRYPOINT ["/usr/bin/WinBox"]
