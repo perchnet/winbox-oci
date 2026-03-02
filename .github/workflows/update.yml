@@ -25,3 +25,9 @@ jobs:
         run: gh pr merge --merge --auto "${{ steps.pr.outputs.pull-request-number }}"
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Run build
+        if: ${{ steps.pr.outputs.pull-request-number != '' }}
+        run: gh workflow run build.yml
+        env:
+          GH_TOKEN: ${{ github.token }}
